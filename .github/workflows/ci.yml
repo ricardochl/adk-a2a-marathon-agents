@@ -1,0 +1,25 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+    tags: ["step-*", "extras"]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install from the lockfile
+        run: uv sync --frozen
+      - name: Tests (no Google Cloud credentials needed)
+        run: uv run pytest -q
+      - name: Environment check without model calls
+        env:
+          GOOGLE_CLOUD_PROJECT: ci-no-project
+          GOOGLE_GENAI_USE_VERTEXAI: "true"
+        # Expected to report a missing .env and credentials in CI; what matters
+        # here is that all three agents build without errors.
+        run: uv run python scripts/check_env.py --skip-models | tee check.txt || true; ! grep -q "does not build" check.txt
