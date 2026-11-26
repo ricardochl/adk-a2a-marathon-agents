@@ -74,7 +74,21 @@ def main() -> int:
 
     text = open(args.file, encoding="utf-8").read() if args.file else (args.prompt or DEFAULT_PROMPT)
 
-    card = httpx.get(f"{args.url}/.well-known/agent-card.json", timeout=10).json()
+    try:
+        card = httpx.get(f"{args.url}/.well-known/agent-card.json", timeout=10).json()
+    except httpx.ConnectError:
+        # Most common workshop mistake: running the client before (or instead
+        # of) the server. Explain it instead of dumping a traceback.
+        if args.url.rstrip("/").endswith(":8089"):
+            start = "uv run python -m src.simulator_agent.runtime.local_server"
+        else:
+            start = ("uv run python -m src.planner_agent.runtime.local_server\n"
+                     "      (Full Team: prefix it with SIMULATOR_AGENT_RESOURCE_NAME=local:8089\n"
+                     "       and start the Simulator first in another tab)")
+        print(f"✗ No A2A server at {args.url}.\n"
+              f"  Start it in ANOTHER terminal tab, wait for 'Uvicorn running', then run this again:\n"
+              f"      {start}")
+        return 1
     print(f"→ Agent: {card.get('name')} ({args.url})")
     print(f"→ Sending: {text[:120]}{'…' if len(text) > 120 else ''}")
     print("  (the Planner can take 1–3 minutes: it designs, evaluates and validates)\n")
