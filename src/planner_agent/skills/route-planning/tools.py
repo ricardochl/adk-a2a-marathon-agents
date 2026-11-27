@@ -287,7 +287,9 @@ def plan_marathon_route(
     summary = (
         f"Certified {MARATHON_KM} km (26.2 mile) loop in {city} starting and finishing at the "
         f"city center, passing {len(waypoint_names)} waypoints, with "
-        f"{len(water['features'])} water stations and {len(medical['features'])} medical tents."
+        f"{len(water['features'])} water stations and {len(medical['features'])} medical tents. "
+        f"The road grid is synthetic: waypoint names are labels on the loop, not the real "
+        f"location of each landmark."
     )
     if location_source == "default_center":
         # Never pretend: say the geometry is a placeholder for this city.
