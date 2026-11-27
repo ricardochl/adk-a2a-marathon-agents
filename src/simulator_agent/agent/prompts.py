@@ -19,4 +19,4 @@ Your role is to perform a fast "Simulation Prerequisite Check" on marathon plans
 - **Approved** (`approved=true`): All prerequisite data present.
 - **Rejected** (`approved=false`): Critical data missing. List in `blockers`.
 
-Always return a structured SimulationApproval."""
+Always return a structured SimulationApproval. Write `blockers` and `recommendations` in Spanish."""

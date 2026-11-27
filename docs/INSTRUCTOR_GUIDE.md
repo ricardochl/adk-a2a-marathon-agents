@@ -68,7 +68,7 @@ paciencia en vivo. En la respuesta, revisa `eval_method`: si dice
 | 18–35 | 7 | **Evaluador.** Leen el paso 4 del codelab. Abre `src/planner_agent/evaluator/config.py` y `tools.py`: los pesos, una métrica, el contrato JSON del juez y el respaldo heurístico. Corren `uv run pytest tests/test_evaluator_contract.py -q`. |
 | 35–45 | 8 | **Simulator y ADK Skills.** Leen el paso 5. Abre `src/simulator_agent/agent/tools.py` y `skills/review-marathon-plan/SKILL.md`. |
 | 45–58 | 9 | **Planner.** Leen el paso 6. Abre `src/planner_agent/agent/tools.py` (SkillToolset, AgentTool, RemoteA2aAgent) y `skills/route-planning/tools.py`. Corren `uv run pytest tests/test_deterministic.py -q -k route`. |
-| 58–82 | 10–11 | **Probar.** Primero modo Solo (solo la pestaña del Planner, sin la variable), luego Equipo completo (las tres pestañas de arriba; mira la línea `Mode:`). Cada quien envía su pedido con su ciudad: `uv run python scripts/send_request.py "Plan a scenic marathon in San Pedro Sula for 10,000 runners, budget USD 1.5M"`. |
+| 58–82 | 10–11 | **Probar.** Primero modo Solo (solo la pestaña del Planner, sin la variable), luego Equipo completo (las tres pestañas de arriba; mira la línea `Mode:`). Cada quien envía su pedido con su ciudad: `uv run python scripts/send_request.py "Planifica una maratón escénica en San Pedro Sula para 10,000 corredores, presupuesto USD 1.5M"`. |
 | 82–90 | 12 | Limpieza y preguntas. |
 
 Para seguir el ritmo: **una comprobación por paso** y nadie avanza hasta que su

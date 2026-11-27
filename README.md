@@ -117,7 +117,7 @@ En otra pestaña:
 
 ```bash
 uv run python scripts/send_request.py            # pedido de ejemplo (San Pedro Sula)
-uv run python scripts/send_request.py "Plan a fast marathon in Tegucigalpa for 8,000 runners in March, budget USD 1M"
+uv run python scripts/send_request.py "Planifica una maratón rápida en Tegucigalpa para 8,000 corredores en marzo, presupuesto USD 1M"
 ```
 
 ### Modo Equipo completo (los tres agentes vía A2A)

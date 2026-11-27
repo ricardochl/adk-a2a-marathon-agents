@@ -2,16 +2,16 @@
 
 > Added for the workshop repo (the codelab creates this `references/` folder but leaves it empty).
 
-| Category  | Item                | Counts as present when the plan mentions…                 | Blocking? |
+| Category  | Item                | Counts as present when the plan mentions… (English or Spanish) | Blocking? |
 |-----------|---------------------|------------------------------------------------------------|-----------|
-| Route     | Distance            | A number in miles/mi or km/kilometers                      | Yes       |
-| Route     | Start / finish      | "start line", "finish line", "start/finish", "starting area" | Yes     |
-| Logistics | Water stations      | "water station"                                            | Yes       |
-| Logistics | Medical             | "medical tent", "first aid", "medical station"             | Yes       |
-| Logistics | Timing              | "timing", "chip", "tracking"                               | Yes       |
-| Safety    | Emergency access    | "emergency", "ambulance", "evacuation"                     | Yes       |
-| Finance   | Budget              | "budget", "cost", "revenue", "expense"                     | No        |
-| Ops       | Timeline            | "schedule", "timeline", "race day", "setup"                | No        |
+| Route     | Distance            | A number in miles/mi or km/kilómetros                      | Yes       |
+| Route     | Start / finish      | "start line", "finish line", "línea de salida", "línea de meta" | Yes     |
+| Logistics | Water stations      | "water station", "estación de agua", "hidratación"                                            | Yes       |
+| Logistics | Medical             | "medical tent", "first aid", "carpa médica", "primeros auxilios"             | Yes       |
+| Logistics | Timing              | "timing", "chip", "tracking", "cronometraje"                               | Yes       |
+| Safety    | Emergency access    | "emergency", "ambulance", "emergencia", "ambulancia"                     | Yes       |
+| Finance   | Budget              | "budget", "cost", "presupuesto", "costo"                     | No        |
+| Ops       | Timeline            | "schedule", "timeline", "cronograma", "horario"                | No        |
 
 ## Decision rules
 

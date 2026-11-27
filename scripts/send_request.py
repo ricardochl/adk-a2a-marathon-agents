@@ -22,10 +22,11 @@ import httpx
 
 DEFAULT_URL = "http://127.0.0.1:8084"
 DEFAULT_PROMPT = (
-    "Plan a scenic marathon in San Pedro Sula, Honduras, on 2027-03-14 for 10,000 runners. "
-    "Budget: USD 1.5M. Pass Parque Central, the Cathedral, Mercado Guamilito and "
-    "Estadio Olímpico Metropolitano, start early to avoid the heat, and keep hospital "
-    "access open. Then evaluate the plan and check simulation readiness."
+    "Planifica una maratón escénica en San Pedro Sula, Honduras, el 2027-03-14 para "
+    "10,000 corredores. Presupuesto: USD 1.5M. Que pase por el Parque Central, la Catedral, "
+    "el Mercado Guamilito y el Estadio Olímpico Metropolitano, que empiece temprano para "
+    "evitar el calor y que mantenga libre el acceso a los hospitales. Luego evalúa el plan "
+    "y revisa si está listo para la simulación."
 )
 
 

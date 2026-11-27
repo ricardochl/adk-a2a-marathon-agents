@@ -12,17 +12,26 @@ async def check_plan_readiness(plan_text: str) -> dict[str, Any]:
     """
     plan_lower = plan_text.lower()
 
+    # Keywords in English and Spanish: the Planner writes its plans in Spanish.
     checklist = {
         "distance_specified": bool(
-            re.search(r'(\d+(?:\.\d+)?)\s*(?:miles?|mi|kilometers?|km)\b', plan_lower)
+            re.search(r'(\d+(?:\.\d+)?)\s*(?:miles?|mi|kilometers?|kil[oó]metros?|km)\b', plan_lower)
         ),
-        "water_stations": "water station" in plan_lower,
-        "medical_tents": any(kw in plan_lower for kw in ["medical tent", "first aid", "medical station"]),
-        "timing_system": any(kw in plan_lower for kw in ["timing", "chip", "tracking"]),
-        "start_finish": any(kw in plan_lower for kw in ["start line", "finish line", "start/finish", "starting area"]),
-        "emergency_access": any(kw in plan_lower for kw in ["emergency", "ambulance", "evacuation"]),
-        "budget_included": any(kw in plan_lower for kw in ["budget", "cost", "revenue", "expense"]),
-        "timeline_included": any(kw in plan_lower for kw in ["schedule", "timeline", "race day", "setup"]),
+        "water_stations": any(kw in plan_lower for kw in [
+            "water station", "estación de agua", "estaciones de agua", "hidratación"]),
+        "medical_tents": any(kw in plan_lower for kw in [
+            "medical tent", "first aid", "medical station",
+            "carpa médica", "carpas médicas", "primeros auxilios", "puesto médico", "puestos médicos"]),
+        "timing_system": any(kw in plan_lower for kw in ["timing", "chip", "tracking", "cronometraje"]),
+        "start_finish": any(kw in plan_lower for kw in [
+            "start line", "finish line", "start/finish", "starting area",
+            "línea de salida", "línea de meta", "salida y meta", "salida/meta", "zona de salida"]),
+        "emergency_access": any(kw in plan_lower for kw in [
+            "emergency", "ambulance", "evacuation", "emergencia", "ambulancia", "evacuación"]),
+        "budget_included": any(kw in plan_lower for kw in [
+            "budget", "cost", "revenue", "expense", "presupuesto", "costo", "ingreso", "gasto"]),
+        "timeline_included": any(kw in plan_lower for kw in [
+            "schedule", "timeline", "race day", "setup", "cronograma", "horario", "día de la carrera", "montaje"]),
     }
 
     passed = sum(checklist.values())
