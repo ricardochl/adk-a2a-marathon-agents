@@ -269,7 +269,7 @@ taller, ver [docs/INSTRUCTOR_GUIDE.md](docs/INSTRUCTOR_GUIDE.md).
 | `ImportError: … a2a.server.apps` / `starlette` | Instalaste sin el lockfile: ejecuta `uv sync` |
 | `Mode: SOLO` con el Simulator corriendo | Faltó `SIMULATOR_AGENT_RESOURCE_NAME=local:8089` al arrancar el Planner |
 | `AgentCardResolutionError … same origin` | Usa el `local_server.py` del Simulator de este repo |
-| `Address already in use` | `pkill -f local_server` |
+| `Address already in use` | `pkill -f local_server` (ver "Detener y limpiar") |
 | `eval_method: heuristic_fallback` | Los jueces fallaron; el motivo está en `eval_error` |
 | `Connection refused` / `No A2A server at …` | El servidor no está corriendo: levántalo en otra pestaña |
 | `Iteration: OFF` aunque pusiste `PLANNER_REVISIONS` | Reinicia el Planner; la variable solo se lee al arrancar |
@@ -295,14 +295,93 @@ git diff step-04 step-05 --stat   # ver qué archivos agrega el paso 5
 git checkout main                 # volver a la versión completa
 ```
 
-## Limpieza
+## Detener y limpiar
 
-`Ctrl+C` en cada pestaña. El taller solo hace llamadas a la API de Vertex AI (sin
-recursos persistentes). Si creaste un proyecto solo para esto:
+### 1. Detener los servidores
+
+Lo normal es `Ctrl+C` en la pestaña de cada servidor. Para detener **todos** de
+una vez, desde cualquier pestaña:
 
 ```bash
-gcloud projects delete $PROJECT_ID
+pkill -f local_server
 ```
+
+Comprueba que los puertos quedaron libres (Planner `8084`, Simulator `8089`). Si
+no imprime nada, están libres:
+
+```bash
+ss -ltnp | grep -E '8084|8089'
+```
+
+Si alguno sigue ocupado:
+
+```bash
+fuser -k 8084/tcp 8089/tcp     # cierra lo que use esos puertos
+pkill -9 -f local_server       # último recurso: un proceso colgado
+```
+
+Es lo que hay que hacer cuando aparece `Address already in use`, y antes de
+reiniciar el Planner tras un `git pull` o un cambio de variables.
+
+### 2. Borrar los archivos generados
+
+Las pruebas dejan archivos sueltos en la carpeta del repo (`route.geojson`,
+`resultado1.txt`, `iteracion.txt`, `pedido.txt`, `demo_resultado.txt`…):
+
+```bash
+git clean -n     # muestra qué se borraría, sin borrar nada
+git clean -f     # borra los archivos que git no conoce
+```
+
+`git clean` no toca `.env` ni `.venv`, porque están en `.gitignore`. Pero sí
+borra tus pedidos y resultados: si quieres conservar alguno, cópialo fuera de la
+carpeta antes (por ejemplo, `cp pedido.txt ~/`).
+
+### 3. Volver el código al estado original
+
+Si modificaste archivos (por ejemplo, haciendo los ejercicios) y quieres empezar
+de nuevo:
+
+```bash
+git status                   # qué cambiaste
+git stash                    # guarda tus cambios aparte, por si los quieres después
+# o, para descartarlos definitivamente:
+git restore .
+git checkout main && git pull
+```
+
+### 4. Rehacer la configuración y el entorno
+
+```bash
+# .env desde cero
+cp .env.example .env && sed -i "s/<YOUR_PROJECT_ID>/$(gcloud config get project)/" .env
+
+# entorno de Python desde cero (si algo quedó roto)
+rm -rf .venv && uv sync
+```
+
+### 5. Borrar todo el taller de Cloud Shell
+
+El disco de Cloud Shell es pequeño (5 GB) y se conserva entre sesiones:
+
+```bash
+pkill -f local_server
+cd ~ && rm -rf ~/adk-a2a-marathon-agents
+uv cache clean               # caché de paquetes de uv
+```
+
+### 6. Recursos en Google Cloud
+
+El taller solo hace llamadas a la API de Vertex AI: no deja máquinas, bases de
+datos ni agentes desplegados cobrando. Lo único que se cobra son las llamadas a
+Gemini que hiciste. Si creaste un proyecto solo para esto, bórralo:
+
+```bash
+gcloud projects delete $(gcloud config get project)
+```
+
+Si el proyecto es tuyo y lo vas a seguir usando, puedes dejarlo así o apagar la
+API: `gcloud services disable aiplatform.googleapis.com`.
 
 ## Créditos y licencia
 
