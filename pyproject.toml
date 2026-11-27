@@ -45,3 +45,7 @@ packages = ["src"]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["src", "."]
+# Optional workshop exercises fail until solved, so they are skipped by
+# default. Run them with:  uv run pytest -m exercise -k ex2
+addopts = "-m 'not exercise'"
+markers = ["exercise: optional workshop exercise (fails until solved, see docs/EXERCISES.md)"]

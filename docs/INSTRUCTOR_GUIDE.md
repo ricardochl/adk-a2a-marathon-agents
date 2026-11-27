@@ -74,6 +74,12 @@ paciencia en vivo. En la respuesta, revisa `eval_method`: si dice
 Para seguir el ritmo: **una comprobación por paso** y nadie avanza hasta que su
 comando dé verde.
 
+**Ejercicios opcionales.** Quien termine un paso antes que el resto puede hacer
+el ejercicio de ese paso en [docs/EXERCISES.md](EXERCISES.md): 1 en el
+Evaluador, 2 en el Simulator, 3 y 4 en el Planner y 5 después de la demo. No
+los hagas en grupo si vas justo de tiempo; las soluciones están en la rama
+`solutions` (`git diff main origin/solutions`).
+
 ## Si algo falla en vivo
 
 | Síntoma | Qué hacer |

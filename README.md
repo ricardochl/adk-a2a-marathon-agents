@@ -38,9 +38,10 @@ Tres agentes de IA colaboran para planificar una maratón en una ciudad:
 ## Puesta en marcha
 
 ```bash
-# 1. Proyecto y API
+# 1. Proyecto, API y facturación
 gcloud config set project <YOUR_PROJECT_ID>
 gcloud services enable aiplatform.googleapis.com
+gcloud beta billing projects describe $(gcloud config get project)   # debe decir billingEnabled: true
 
 # 2. uv (si no lo tienes)
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -69,26 +70,31 @@ uv run python scripts/check_env.py
 agentes se construyan, los puertos, las credenciales y hace una llamada mínima a
 cada modelo. Con `--skip-models` no hace llamadas (gratis).
 
-## Seguir el taller paso a paso
+> Si la facturación sale `billingEnabled: false`, vincula la cuenta de prueba
+> donde canjeaste el crédito: `gcloud billing accounts list` y luego
+> `gcloud billing projects link $(gcloud config get project) --billing-account=<ACCOUNT_ID>`.
 
-Cada paso del codelab es un commit con su etiqueta. Si te atrasas, salta al
-estado del paso:
+## Cómo seguir el taller
 
-| Etiqueta | Paso del codelab | Qué contiene |
+Todo se trabaja en la rama `main`, que ya tiene el código completo y
+funcionando. El codelab es el libro de texto: **léelo** para entender qué hace
+cada agente y por qué, pero **no copies su código**, porque tal cual hoy no
+funciona (ver [docs/FIXES.md](docs/FIXES.md)). En cada paso, lee la sección del
+codelab, abre los archivos en el editor de Cloud Shell y corre la comprobación.
+
+| Paso del codelab | Abre en el repo | Comprueba con |
 |---|---|---|
-| `step-03` | 3. Configura el proyecto | Estructura, `config.py`, servicios de sesión y memoria, versiones fijadas |
-| `step-04` | 4. Agente Evaluador | 7 métricas, contrato JSON del juez, evaluación híbrida |
-| `step-05` | 5. Simulation Controller | Checklist determinístico + ADK Skill `review-marathon-plan` |
-| `step-06` | 6. Marathon Planner | Skills, `AgentTool`, `SerializableRemoteA2aAgent`, tool de rutas |
-| `step-07` | 7. Implementa y prueba | Tarjetas A2A, servidores locales, cliente, tests |
-| `extras` | — | Verificación de entorno, guía del instructor, CI |
+| 3. Configura el proyecto | `pyproject.toml`, `.env.example` | `uv run python scripts/check_env.py` → `Ready for the workshop` |
+| 4. Agente Evaluador | `src/planner_agent/evaluator/config.py` y `tools.py` | `uv run pytest tests/test_evaluator_contract.py -q` → `7 passed` |
+| 5. Simulation Controller | `src/simulator_agent/agent/tools.py` y `skills/review-marathon-plan/SKILL.md` | Simulator en una pestaña y `uv run python scripts/send_request.py --url http://127.0.0.1:8089 --file examples/sample_plan.md` en otra |
+| 6. Marathon Planner | `src/planner_agent/agent/tools.py`, `planner-instruction.md` y `skills/route-planning/tools.py` | `uv run pytest tests/test_deterministic.py -q -k route` → `15 passed` |
+| 7. Implementa y prueba | `src/*/runtime/local_server.py` | Modo Solo y Equipo completo (sección siguiente) y un pedido con `send_request.py` |
 
-```bash
-git checkout step-05      # ver el estado al terminar el paso 5
-git checkout main         # volver a la versión final
-```
-
-Todas las etiquetas instalan con el mismo `uv.lock`.
+**¿Terminaste antes o quieres practicar?** Hay cinco
+[ejercicios opcionales](docs/EXERCISES.md) donde escribes código: darle más
+peso a la seguridad, exigir un protocolo de calor, escribir una herramienta
+nueva para el Planner, agregar tu ciudad y enseñarle al Planner a planificar
+para el calor.
 
 ## Ejecutar
 
@@ -185,6 +191,26 @@ taller, ver [docs/INSTRUCTOR_GUIDE.md](docs/INSTRUCTOR_GUIDE.md).
 | `AgentCardResolutionError … same origin` | Usa el `local_server.py` del Simulator de este repo |
 | `Address already in use` | `pkill -f local_server` |
 | `eval_method: heuristic_fallback` | Los jueces fallaron; el motivo está en `eval_error` |
+| `Connection refused` / `No A2A server at …` | El servidor no está corriendo: levántalo en otra pestaña |
+
+## Para rehacerlo en casa (opcional)
+
+No hace falta durante el taller. Si quieres construir el proyecto desde cero
+leyendo el codelab, cada paso es un commit con su etiqueta:
+
+| Etiqueta | Paso del codelab | Qué contiene |
+|---|---|---|
+| `step-03` | 3. Configura el proyecto | Estructura, `config.py`, servicios de sesión y memoria, versiones fijadas |
+| `step-04` | 4. Agente Evaluador | 7 métricas, contrato JSON del juez, evaluación híbrida |
+| `step-05` | 5. Simulation Controller | Checklist determinístico + ADK Skill `review-marathon-plan` |
+| `step-06` | 6. Marathon Planner | Skills, `AgentTool`, `SerializableRemoteA2aAgent`, tool de rutas |
+| `step-07` | 7. Implementa y prueba | Tarjetas A2A, servidores locales, cliente, tests |
+
+```bash
+git checkout step-03              # empezar desde la estructura
+git diff step-04 step-05 --stat   # ver qué archivos agrega el paso 5
+git checkout main                 # volver a la versión completa
+```
 
 ## Limpieza
 
