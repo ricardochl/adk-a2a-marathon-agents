@@ -267,7 +267,7 @@ def _check_distance_compliance_logic(response_text: str) -> dict:
                 score = 60.0
                 issues.append(f"Route distance {distance} miles is close but not exactly 26.2 miles")
 
-    for distance_str in re.findall(r'(\d+(?:\.\d+)?)\s*(?:kilometers?|km)\b', text_lower):
+    for distance_str in re.findall(r'(\d+(?:\.\d+)?)\s*(?:kilometers?|kil[oó]metros?|km)\b', text_lower):
         distance = float(distance_str)
         if 35 <= distance <= 50 and abs(distance - 42.195) > 1.0:
             score = 1.0
@@ -403,21 +403,21 @@ def _heuristic_eval(user_intent: str, proposed_plan: str) -> tuple[dict[str, flo
     safety_score = 80.0
     if "emergency" in plan_lower and "no detour" in plan_lower:
         safety_score = 20.0
-    if "emergency vehicle" in plan_lower:
+    if any(kw in plan_lower for kw in ["emergency vehicle", "vehículo de emergencia", "vehículos de emergencia"]):
         safety_score = min(safety_score + 10.0, 100.0)
     scores["safety_compliance"] = safety_score
     details["safety_compliance"] = "Heuristic safety check"
 
     # Community
     community_score = 75.0
-    if any(kw in plan_lower for kw in ["cheer zone", "community"]):
+    if any(kw in plan_lower for kw in ["cheer zone", "community", "zona de animación", "comunidad"]):
         community_score = min(community_score + 10.0, 100.0)
     scores["community_impact"] = community_score
     details["community_impact"] = "Heuristic community check"
 
     # Logistics
     logistics_score = 60.0
-    for kw in ["hydration", "timing", "chip", "marshal"]:
+    for kw in ["hydration", "timing", "chip", "marshal", "hidratación", "cronometraje", "voluntario"]:
         if kw in plan_lower:
             logistics_score += 10.0
     scores["logistics_completeness"] = min(logistics_score, 100.0)
@@ -425,7 +425,7 @@ def _heuristic_eval(user_intent: str, proposed_plan: str) -> tuple[dict[str, flo
 
     # Financial
     financial_score = 65.0
-    for kw in ["budget", "cost", "revenue", "sponsor"]:
+    for kw in ["budget", "cost", "revenue", "sponsor", "presupuesto", "costo", "ingreso", "patrocin"]:
         if kw in plan_lower:
             financial_score += 8.0
     scores["financial_viability"] = min(financial_score, 100.0)
@@ -433,7 +433,7 @@ def _heuristic_eval(user_intent: str, proposed_plan: str) -> tuple[dict[str, flo
 
     # Experience
     experience_score = 70.0
-    for kw in ["scenic", "landmark", "medal", "post-race"]:
+    for kw in ["scenic", "landmark", "medal", "post-race", "paisaj", "emblemático", "medalla", "post carrera"]:
         if kw in plan_lower:
             experience_score += 8.0
     scores["participant_experience"] = min(experience_score, 100.0)

@@ -144,3 +144,25 @@ def test_unknown_city_is_flagged_not_hidden():
     known = tools.plan_marathon_route("San Pedro Sula, Honduras")
     assert known["location_source"] == "known_city"
     assert not known["summary"].startswith("WARNING")
+
+
+SPANISH_PLAN = """Plan de la maratón de San Pedro Sula: ruta de 42.195 km con línea de salida
+y línea de meta en el Parque Central. Estaciones de agua cada 2.5 km, carpas médicas y
+primeros auxilios, cronometraje con chip, carriles de emergencia para ambulancias.
+Presupuesto USD 1.5M, cronograma del día de la carrera y protocolo de calor."""
+
+
+def test_simulator_accepts_a_plan_written_in_spanish():
+    import asyncio
+    from src.simulator_agent.agent.tools import check_plan_readiness
+
+    result = asyncio.run(check_plan_readiness(SPANISH_PLAN))
+    assert result["readiness_score"] == 1.0, result
+
+
+def test_distance_check_understands_kilometros():
+    from src.planner_agent.evaluator.tools import _check_distance_compliance_logic
+
+    exact = _check_distance_compliance_logic("Ruta de 42.195 km")["score"]
+    assert _check_distance_compliance_logic("Ruta de 42.195 kilómetros")["score"] == exact
+    assert _check_distance_compliance_logic("Ruta de 45 kilómetros")["score"] < exact
