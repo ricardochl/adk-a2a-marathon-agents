@@ -44,6 +44,7 @@ CITY_CENTERS: dict[str, tuple[float, float]] = {
     "tegucigalpa": (14.0723, -87.1921),
     "san pedro sula": (15.5050, -88.0250),
     "san salvador": (13.6929, -89.2182),
+    "la ceiba": (15.78, -86.79),  # Exercise 4
     "bogota": (4.7110, -74.0721),
     "buenos aires": (-34.6037, -58.3816),
     "lima": (-12.0464, -77.0428),

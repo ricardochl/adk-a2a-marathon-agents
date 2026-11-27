@@ -26,8 +26,8 @@ EVALUATOR_MODE = os.getenv("EVALUATOR_MODE", "vertex").strip().lower()
 
 # Weights must sum to 1.0
 CRITERION_WEIGHTS = {
-    "safety_compliance": 0.20,
-    "community_impact": 0.15,
+    "safety_compliance": 0.25,
+    "community_impact": 0.10,
     "logistics_completeness": 0.20,
     "financial_viability": 0.15,
     "participant_experience": 0.15,

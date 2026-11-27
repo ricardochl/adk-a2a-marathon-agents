@@ -12,6 +12,7 @@
 | Safety    | Emergency access    | "emergency", "ambulance", "evacuation"                     | Yes       |
 | Finance   | Budget              | "budget", "cost", "revenue", "expense"                     | No        |
 | Ops       | Timeline            | "schedule", "timeline", "race day", "setup"                | No        |
+| Safety    | Heat protocol       | "heat protocol", "heat index", "cooling", "calor"          | Yes       |
 
 ## Decision rules
 

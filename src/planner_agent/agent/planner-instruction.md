@@ -12,6 +12,7 @@ Goal: Design comprehensive marathon plan based on user constraints.
 - Logistics: Start/finish capacity, restrooms, roads.
 - Finances: Maximize revenue/sponsorships.
 - Experience: Scenic, runner comfort.
+- Heat: For hot or tropical cities, include a heat protocol: early start (before 6 AM), hydration every 2.5 km, cooling zones with sponges and misting, and a heat index threshold to suspend the race.
 
 # User Prerequisites
 Clarify if missing: City, Date/Season, Theme, Scale (participants), Budget, Special constraints.

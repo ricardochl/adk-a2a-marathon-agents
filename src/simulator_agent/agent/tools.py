@@ -23,6 +23,8 @@ async def check_plan_readiness(plan_text: str) -> dict[str, Any]:
         "emergency_access": any(kw in plan_lower for kw in ["emergency", "ambulance", "evacuation"]),
         "budget_included": any(kw in plan_lower for kw in ["budget", "cost", "revenue", "expense"]),
         "timeline_included": any(kw in plan_lower for kw in ["schedule", "timeline", "race day", "setup"]),
+        # Exercise 2: hot-climate races need a heat protocol.
+        "heat_protocol": any(kw in plan_lower for kw in ["heat protocol", "heat index", "cooling", "calor"]),
     }
 
     passed = sum(checklist.values())

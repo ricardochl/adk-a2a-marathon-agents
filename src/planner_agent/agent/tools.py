@@ -123,6 +123,38 @@ def create_simulation_controller_tool() -> AgentTool:
 
 
 # ============================================================================
+# EXERCISE 3: A NEW TOOL
+# ============================================================================
+
+
+def estimate_budget(participants: int, cost_per_runner_usd: float = 130.0) -> dict:
+    """Estimate the marathon budget and how much sponsorship it needs.
+
+    Use it whenever the plan needs cost, registration fee or sponsorship
+    figures, instead of doing the arithmetic yourself.
+
+    Args:
+        participants: Expected number of runners.
+        cost_per_runner_usd: All-in cost per runner in USD (road closures,
+            police, medical, timing, medals). Defaults to 130.
+
+    Returns:
+        dict with participants, cost_per_runner_usd, total_cost_usd,
+        suggested_registration_fee_usd (covers 60% of the cost per runner)
+        and sponsorship_needed_usd (the remaining 40%).
+    """
+    total = participants * cost_per_runner_usd
+    fee = round(cost_per_runner_usd * 0.60, 2)
+    return {
+        "participants": participants,
+        "cost_per_runner_usd": cost_per_runner_usd,
+        "total_cost_usd": round(total, 2),
+        "suggested_registration_fee_usd": fee,
+        "sponsorship_needed_usd": round(total - participants * fee, 2),
+    }
+
+
+# ============================================================================
 # TOOL EXPORT
 # ============================================================================
 
@@ -164,6 +196,9 @@ def get_tools() -> list:
 
     if plan_marathon_route_func:
         tools.append(FunctionTool(func=plan_marathon_route_func))
+
+    # Exercise 3: budget arithmetic as a tool
+    tools.append(FunctionTool(func=estimate_budget))
 
     # Add local evaluator sub-agent
     tools.append(create_evaluator_tool())
