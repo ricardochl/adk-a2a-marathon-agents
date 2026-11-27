@@ -7,6 +7,7 @@ from typing import Any
 BLOCKING_CHECKS = {
     "distance_specified", "water_stations", "medical_tents",
     "timing_system", "start_finish", "emergency_access",
+    "heat_protocol",  # Exercise 2
 }
 
 
