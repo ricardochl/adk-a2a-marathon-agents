@@ -111,6 +111,7 @@ Added local Evaluator tool
 Tools: SkillToolset, preload_memory, plan_marathon_route, evaluator_agent
 Mode: SOLO (Planner + Evaluator)
 Model location: global · Evaluator: vertex
+Iteration: OFF · single evaluation (set PLANNER_REVISIONS=1 to turn it on)
 ```
 
 En otra pestaña:
@@ -150,6 +151,85 @@ EVALUATOR_MODE=heuristic uv run python -m src.planner_agent.runtime.local_server
 La respuesta del Evaluador siempre indica qué método usó en `eval_method`:
 `vertex_ai_eval`, `heuristic` (elegido) o `heuristic_fallback` (Vertex AI
 Evaluation falló; el motivo está en `eval_error`).
+
+### Iterar un plan que no aprobó
+
+El Evaluator aprueba con 85 o más, así que lo normal es que el primer plan
+**no apruebe**. Hay dos formas de iterar.
+
+#### A. Automática: el Planner se corrige solo
+
+Con `PLANNER_REVISIONS`, si el plan no aprueba, el Planner lo corrige usando los
+hallazgos del Evaluator y lo vuelve a enviar, hasta N veces. Se detiene en
+cuanto una ronda aprueba. El Simulator revisa solo la versión final.
+
+| Valor | Qué hace | Tiempo y costo aprox. |
+|---|---|---|
+| `0` (por defecto) | Una sola evaluación, como en el codelab | 1× |
+| `1` | Hasta 1 corrección → máximo 2 evaluaciones | hasta 2× |
+| `2` | Hasta 2 correcciones → máximo 3 evaluaciones | hasta 3× |
+| `3` | Máximo permitido (valores mayores se limitan a 3) | hasta 4× |
+
+**Encenderla solo para este arranque** (recomendado en clase, porque se ve en el
+comando):
+
+```bash
+PLANNER_REVISIONS=1 uv run python -m src.planner_agent.runtime.local_server
+
+# con el Simulator (Equipo completo)
+PLANNER_REVISIONS=1 SIMULATOR_AGENT_RESOURCE_NAME=local:8089 uv run python -m src.planner_agent.runtime.local_server
+```
+
+**Dejarla fija:** en `.env` cambia `PLANNER_REVISIONS=0` por el valor que quieras:
+
+```bash
+sed -i 's/^PLANNER_REVISIONS=.*/PLANNER_REVISIONS=1/' .env
+```
+
+**Comprobar que está encendida:** el banner del Planner dice
+`Iteration: ON · up to 1 revision(s), 2 evaluations max`. Con `OFF` está apagada.
+
+**Apagarla:** arranca con `PLANNER_REVISIONS=0`, o vuelve a poner `0` en `.env`.
+Cualquier cambio necesita reiniciar el Planner (`Ctrl+C` y arrancarlo de nuevo).
+
+**Qué cambia en la respuesta:** al final aparece una tabla con la nota de cada
+ronda y qué se corrigió en cada una. La nota que cuenta es la de la última ronda.
+
+Cada ronda es otra evaluación completa con los 6 jueces, así que un pedido con
+`PLANNER_REVISIONS=1` puede tardar 3–4 minutos. `send_request.py` espera hasta
+10 minutos; para más, usa `--timeout 900`.
+
+**Cambiar cómo itera:** las reglas de la iteración están en
+`src/planner_agent/agent/prompts.py` (función `_iteration_rules`): por ejemplo,
+qué debe mostrar en la tabla o qué puede cambiar en cada ronda. El máximo de
+rondas está en `MAX_REVISIONS` de `src/planner_agent/agent/config.py`, y la nota
+para aprobar en `PASS_THRESHOLD` de `src/planner_agent/evaluator/config.py`.
+Bajar esa nota hace que más planes "aprueben", pero no los mejora.
+
+#### B. A mano: le reenvías el plan con sus críticas
+
+Cada pedido es una conversación nueva, así que el Planner no recuerda el plan
+anterior: hay que mandárselo.
+
+```bash
+# 1. Guarda la respuesta
+uv run python scripts/send_request.py --file pedido.txt | tee resultado1.txt
+
+# 2. Arma el pedido de iteración con el plan anterior adentro
+{
+  echo "Mejora este plan de maratón. Corrige los hallazgos del Evaluator y los bloqueos del Simulator que aparecen al final. Mantén lo que ya está bien. Después evalúalo y revisa la simulación otra vez."
+  echo
+  echo "--- PLAN ANTERIOR Y SUS RESULTADOS ---"
+  cat resultado1.txt
+} > iteracion.txt
+
+# 3. Envíalo
+uv run python scripts/send_request.py --file iteracion.txt | tee resultado2.txt
+```
+
+Puedes abrir `iteracion.txt` en el editor y agregar indicaciones concretas
+("detalla los ingresos por patrocinador"). Mientras más específicas, más sube la
+nota.
 
 ### Tests (sin credenciales)
 
@@ -192,6 +272,9 @@ taller, ver [docs/INSTRUCTOR_GUIDE.md](docs/INSTRUCTOR_GUIDE.md).
 | `Address already in use` | `pkill -f local_server` |
 | `eval_method: heuristic_fallback` | Los jueces fallaron; el motivo está en `eval_error` |
 | `Connection refused` / `No A2A server at …` | El servidor no está corriendo: levántalo en otra pestaña |
+| `Iteration: OFF` aunque pusiste `PLANNER_REVISIONS` | Reinicia el Planner; la variable solo se lee al arrancar |
+| `PLANNER_REVISIONS must be a whole number` | Usa un número entero de 0 a 3 |
+| `send_request.py` corta por tiempo con la iteración encendida | `uv run python scripts/send_request.py --timeout 900 …` |
 
 ## Para rehacerlo en casa (opcional)
 
