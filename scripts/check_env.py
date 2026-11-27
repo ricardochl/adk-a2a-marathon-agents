@@ -148,7 +148,7 @@ def check_agents() -> None:
         spec = importlib.util.spec_from_file_location("route_tools", path)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        km = mod.plan_marathon_route("Las Vegas")["distance_km"]
+        km = mod.plan_marathon_route("San Pedro Sula")["distance_km"]
         (ok if abs(km - 42.195) < 0.01 else fail)(f"Sample route: {km} km")
     except Exception as e:
         fail(f"plan_marathon_route fails: {e}")

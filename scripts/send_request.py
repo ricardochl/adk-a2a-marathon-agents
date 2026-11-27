@@ -6,7 +6,7 @@ the multi-agent system actually run. This script exercises it end to end.
 
 Usage:
     uv run python scripts/send_request.py
-    uv run python scripts/send_request.py "Plan a fast marathon in Austin for 15,000 runners in March, budget USD 3M"
+    uv run python scripts/send_request.py "Plan a fast marathon in Tegucigalpa for 8,000 runners in March, budget USD 1M"
     uv run python scripts/send_request.py --url http://127.0.0.1:8089 --file examples/sample_plan.md
 """
 
@@ -22,9 +22,10 @@ import httpx
 
 DEFAULT_URL = "http://127.0.0.1:8084"
 DEFAULT_PROMPT = (
-    "Plan a scenic marathon through Las Vegas on 2027-02-21 for 30,000 runners. "
-    "Budget: USD 6M. Pass the Strip landmarks (Bellagio, Sphere, Fremont Street) "
-    "and keep hospital access open. Then evaluate the plan and check simulation readiness."
+    "Plan a scenic marathon in San Pedro Sula, Honduras, on 2027-03-14 for 10,000 runners. "
+    "Budget: USD 1.5M. Pass Parque Central, the Cathedral, Mercado Guamilito and "
+    "Estadio Olímpico Metropolitano, start early to avoid the heat, and keep hospital "
+    "access open. Then evaluate the plan and check simulation readiness."
 )
 
 

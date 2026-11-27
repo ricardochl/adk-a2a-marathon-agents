@@ -22,13 +22,16 @@ from __future__ import annotations
 
 import heapq
 import math
+import re
+import unicodedata
 from typing import Any
 
 MARATHON_KM = 42.195
 KM_PER_MILE = 1.609344
 
-# Approximate city centers (lat, lng). Any other city uses DEFAULT_CENTER
-# unless explicit coordinates are passed.
+# Approximate city centers (lat, lng), keyed by normalized name (lowercase, no
+# accents). Any other city uses DEFAULT_CENTER unless explicit coordinates are
+# passed, and the result says so in "location_source".
 CITY_CENTERS: dict[str, tuple[float, float]] = {
     "las vegas": (36.1147, -115.1728),
     "austin": (30.2672, -97.7431),
@@ -46,7 +49,41 @@ CITY_CENTERS: dict[str, tuple[float, float]] = {
     "lima": (-12.0464, -77.0428),
     "santiago": (-33.4489, -70.6693),
 }
-DEFAULT_CENTER = (36.1147, -115.1728)  # Las Vegas
+CITY_ALIASES: dict[str, str] = {
+    "sps": "san pedro sula",
+    "tegus": "tegucigalpa",
+    "cdmx": "ciudad de mexico",
+    "nyc": "new york",
+    "new york city": "new york",
+}
+DEFAULT_CITY = "san pedro sula"
+DEFAULT_CENTER = CITY_CENTERS[DEFAULT_CITY]
+
+
+def _normalize(text: str) -> str:
+    """Lowercase, strip accents and punctuation: 'Bogotá, D.C.' -> 'bogota d c'."""
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
+def resolve_city(city: str) -> tuple[str | None, tuple[float, float]]:
+    """Find a known city inside free text the model may produce.
+
+    Accepts "San Pedro Sula", "san pedro sula, Honduras", "SPS", "Bogotá"...
+    Returns (matched_city or None, center).
+    """
+    norm = _normalize(city or "")
+    if norm in CITY_ALIASES:
+        norm = CITY_ALIASES[norm]
+    if norm in CITY_CENTERS:
+        return norm, CITY_CENTERS[norm]
+    padded = f" {norm} "
+    # Longest name first, so "san pedro sula" wins over any shorter match.
+    for name in sorted([*CITY_CENTERS, *CITY_ALIASES], key=len, reverse=True):
+        if f" {name} " in padded:
+            name = CITY_ALIASES.get(name, name)
+            return name, CITY_CENTERS[name]
+    return None, DEFAULT_CENTER
 
 GRID_STEP_KM = 0.5
 GRID_HALF_SIZE = 16  # 33x33 nodes → ~16 km x 16 km
@@ -156,21 +193,24 @@ def plan_marathon_route(
     """Generate a certified 42.195 km (26.2 mi) marathon loop as GeoJSON.
 
     Args:
-        city: City where the marathon takes place (e.g. "Las Vegas").
+        city: City where the marathon takes place (e.g. "San Pedro Sula").
         landmarks: Ordered landmark names the route should pass (optional).
         theme: "scenic" (wider loop past landmarks) or "fast" (compact, flatter loop).
         start_lat: Optional latitude of the start/finish line.
         start_lng: Optional longitude of the start/finish line.
 
     Returns:
-        dict with distance_km, distance_miles, waypoints, summary and a GeoJSON
-        FeatureCollection under "geojson".
+        dict with distance_km, distance_miles, waypoints, summary,
+        location_source ("coordinates", "known_city" or "default_center") and
+        a GeoJSON FeatureCollection under "geojson".
     """
     landmarks = [l for l in (landmarks or []) if l and l.strip()]
     if start_lat is not None and start_lng is not None:
         center = (float(start_lat), float(start_lng))
+        location_source = "coordinates"
     else:
-        center = CITY_CENTERS.get(city.strip().lower(), DEFAULT_CENTER)
+        matched, center = resolve_city(city)
+        location_source = "known_city" if matched else "default_center"
 
     coords, graph = _build_grid(center)
 
@@ -238,19 +278,29 @@ def plan_marathon_route(
     features.extend(water["features"])
     features.extend(medical["features"])
 
+    summary = (
+        f"Certified {MARATHON_KM} km (26.2 mile) loop in {city} starting and finishing at the "
+        f"city center, passing {len(waypoint_names)} waypoints, with "
+        f"{len(water['features'])} water stations and {len(medical['features'])} medical tents."
+    )
+    if location_source == "default_center":
+        # Never pretend: say the geometry is a placeholder for this city.
+        summary = (
+            f"WARNING: '{city}' is not in the built-in city list, so the GeoJSON is drawn "
+            f"around a placeholder center (San Pedro Sula). Tell the user, or call again "
+            f"with start_lat/start_lng. " + summary
+        )
+
     return {
         "city": city,
+        "location_source": location_source,
         "theme": theme,
         "distance_km": round(total_km, 3),
         "distance_miles": round(total_km / KM_PER_MILE, 2),
         "waypoints": ["Start line", *waypoint_names, "Finish line"],
         "water_stations": len(water["features"]),
         "medical_tents": len(medical["features"]),
-        "summary": (
-            f"Certified {MARATHON_KM} km (26.2 mile) loop in {city} starting and finishing at the "
-            f"city center, passing {len(waypoint_names)} waypoints, with "
-            f"{len(water['features'])} water stations and {len(medical['features'])} medical tents."
-        ),
+        "summary": summary,
         "geojson": {"type": "FeatureCollection", "features": features},
     }
 

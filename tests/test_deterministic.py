@@ -50,7 +50,7 @@ async def test_evaluate_plan_heuristic_fallback(monkeypatch):
     from src.planner_agent.evaluator.tools import evaluate_plan
 
     plan = (ROOT / "examples/sample_plan.md").read_text()
-    result = await evaluate_plan(json.dumps({"user_intent": "Scenic Las Vegas marathon", "proposed_plan": plan}))
+    result = await evaluate_plan(json.dumps({"user_intent": "Scenic San Pedro Sula marathon", "proposed_plan": plan}))
     assert result["eval_method"] == "heuristic"
     assert set(result["scores"]) == {
         "safety_compliance", "community_impact", "logistics_completeness",
@@ -112,3 +112,35 @@ def test_ttl_cache_evicts_when_full():
     for i in range(4):
         cache.set(f"k{i}", i)
     assert len(cache._cache) <= 3
+
+
+# --- City resolution -------------------------------------------------------
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        ("San Pedro Sula", "san pedro sula"),
+        ("San Pedro Sula, Honduras", "san pedro sula"),
+        ("SAN PEDRO SULA", "san pedro sula"),
+        ("SPS", "san pedro sula"),
+        ("Tegucigalpa, Honduras", "tegucigalpa"),
+        ("Bogotá", "bogota"),
+        ("Ciudad de México", "ciudad de mexico"),
+        ("San Salvador, El Salvador", "san salvador"),
+    ],
+)
+def test_resolve_city_accepts_free_text(text, expected):
+    tools = _load_route_tools()
+    matched, center = tools.resolve_city(text)
+    assert matched == expected
+    assert center == tools.CITY_CENTERS[expected]
+
+
+def test_unknown_city_is_flagged_not_hidden():
+    tools = _load_route_tools()
+    route = tools.plan_marathon_route("Guatemala City")
+    assert route["location_source"] == "default_center"
+    assert route["summary"].startswith("WARNING")
+    known = tools.plan_marathon_route("San Pedro Sula, Honduras")
+    assert known["location_source"] == "known_city"
+    assert not known["summary"].startswith("WARNING")
