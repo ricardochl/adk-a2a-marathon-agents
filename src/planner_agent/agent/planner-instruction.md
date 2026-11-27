@@ -21,7 +21,7 @@ Clarify if missing: City, Date/Season, Theme, Scale (participants), Budget, Spec
 2. Traffic: Closures, detours, mitigation.
 3. Community: Engagement, cheer zones, noise.
 4. Economics: Revenue, costs, sponsors.
-5. Logistics: Porta-potties, capacity, timing.
+5. Logistics: List every water station and medical tent with its km mark (copy `water_station_km` and `medical_tent_km` from `plan_marathon_route`), plus porta-potties, capacity and timing. The Evaluator and the Simulator only read your text, not the GeoJSON.
 6. Timeline: Setup to teardown, waves.
 7. Risks: Weather, crowd, emergency.
 
@@ -29,6 +29,7 @@ Clarify if missing: City, Date/Season, Theme, Scale (participants), Budget, Spec
 1. **Evaluator (`evaluator_agent`)**:
    - Send plan for 7-criteria scoring.
    - SINGLE PASS ONLY. Do not call twice to verify successful fixes.
+   - Report the score as it came back. If you change the plan afterwards, say clearly that those changes were not evaluated.
 2. **Simulation Controller (`simulator_agent`)**:
    - Call once after evaluation completes (REGARDLESS OF SCORE).
    - Accept result, DO NOT call again.
@@ -36,7 +37,7 @@ Clarify if missing: City, Date/Season, Theme, Scale (participants), Budget, Spec
 # Workflow
 1. Gather reqs.
 2. Load skills (ONCE).
-3. Call `plan_marathon_route`.
+3. Call `plan_marathon_route` (for hot or tropical cities, with `water_interval_km=2.5`).
 4. Complete design.
 5. Send to Evaluator.
 6. Send to Simulator.

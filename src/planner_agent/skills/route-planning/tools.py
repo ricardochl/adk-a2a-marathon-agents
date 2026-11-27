@@ -189,6 +189,7 @@ def plan_marathon_route(
     theme: str = "scenic",
     start_lat: float | None = None,
     start_lng: float | None = None,
+    water_interval_km: float = 5.0,
 ) -> dict[str, Any]:
     """Generate a certified 42.195 km (26.2 mi) marathon loop as GeoJSON.
 
@@ -198,9 +199,12 @@ def plan_marathon_route(
         theme: "scenic" (wider loop past landmarks) or "fast" (compact, flatter loop).
         start_lat: Optional latitude of the start/finish line.
         start_lng: Optional longitude of the start/finish line.
+        water_interval_km: Distance between water stations. 5 km is the usual
+            standard; use 2.5 km for hot or tropical cities.
 
     Returns:
         dict with distance_km, distance_miles, waypoints, summary,
+        water_station_km and medical_tent_km (the km mark of each station),
         location_source ("coordinates", "known_city" or "default_center") and
         a GeoJSON FeatureCollection under "geojson".
     """
@@ -273,7 +277,8 @@ def plan_marathon_route(
         waypoint_names.append(name)
         features.append(_point_feature(coords[node], kind="landmark", name=name, order=idx + 1))
 
-    water = add_water_stations(line_coordinates=[[p[1], p[0]] for p in line])
+    water = add_water_stations(line_coordinates=[[p[1], p[0]] for p in line],
+                               interval_km=water_interval_km)
     medical = add_medical_tents(line_coordinates=[[p[1], p[0]] for p in line])
     features.extend(water["features"])
     features.extend(medical["features"])
@@ -300,6 +305,10 @@ def plan_marathon_route(
         "waypoints": ["Start line", *waypoint_names, "Finish line"],
         "water_stations": len(water["features"]),
         "medical_tents": len(medical["features"]),
+        # Listed so the Planner can copy them into the plan: the Evaluator and
+        # the Simulator only read the plan text, never this GeoJSON.
+        "water_station_km": [f["properties"]["km"] for f in water["features"]],
+        "medical_tent_km": [f["properties"]["km"] for f in medical["features"]],
         "summary": summary,
         "geojson": {"type": "FeatureCollection", "features": features},
     }
