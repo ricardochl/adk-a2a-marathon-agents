@@ -149,7 +149,7 @@ def test_unknown_city_is_flagged_not_hidden():
 SPANISH_PLAN = """Plan de la maratón de San Pedro Sula: ruta de 42.195 km con línea de salida
 y línea de meta en el Parque Central. Estaciones de agua cada 2.5 km, carpas médicas y
 primeros auxilios, cronometraje con chip, carriles de emergencia para ambulancias.
-Presupuesto USD 1.5M y cronograma del día de la carrera."""
+Presupuesto USD 1.5M, cronograma del día de la carrera y protocolo de calor."""
 
 
 def test_simulator_accepts_a_plan_written_in_spanish():
