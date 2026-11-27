@@ -73,6 +73,12 @@ async def run_server():
     print(f"Mode: {mode}")
     print(f"Model location: {os.environ.get('GOOGLE_CLOUD_LOCATION', 'global')}"
           f" · Evaluator: {os.environ.get('EVALUATOR_MODE', 'vertex')}")
+    from ..agent.config import PLANNER_REVISIONS
+    if PLANNER_REVISIONS:
+        print(f"Iteration: ON · up to {PLANNER_REVISIONS} revision(s), "
+              f"{PLANNER_REVISIONS + 1} evaluations max (PLANNER_REVISIONS={PLANNER_REVISIONS})")
+    else:
+        print("Iteration: OFF · single evaluation (set PLANNER_REVISIONS=1 to turn it on)")
     print(f"Planner A2A server: http://127.0.0.1:{AGENT_PORT}")
     print(f"Agent card: http://127.0.0.1:{AGENT_PORT}/.well-known/agent-card.json")
     print("Press Ctrl+C to stop")

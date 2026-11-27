@@ -188,3 +188,28 @@ async def test_simulator_decides_approval_in_code():
     no_timing = await check_plan_readiness(SPANISH_PLAN.replace("cronometraje con chip", "salidas por olas"))
     assert no_timing["approved"] is False
     assert no_timing["blockers"] == ["timing_system"]
+
+
+def test_planner_instruction_single_pass_by_default():
+    from src.planner_agent.agent.prompts import build_instruction
+
+    text = build_instruction(0)
+    assert "SINGLE PASS ONLY" in text
+    assert "ITERATE" not in text
+
+
+def test_planner_instruction_with_revisions():
+    from src.planner_agent.agent.prompts import build_instruction
+
+    text = build_instruction(2)
+    assert "SINGLE PASS ONLY" not in text
+    assert "At most 2 revision(s), so at most 3 evaluations" in text
+    assert "revise and re-send (up to 2 time(s))" in text
+
+
+@pytest.mark.parametrize("raw, expected", [("", 0), ("0", 0), ("1", 1), ("7", 3), ("-1", 0)])
+def test_planner_revisions_env(monkeypatch, raw, expected):
+    from src.planner_agent.agent import config
+
+    monkeypatch.setenv("PLANNER_REVISIONS", raw)
+    assert config._read_revisions() == expected

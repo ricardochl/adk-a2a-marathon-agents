@@ -80,6 +80,18 @@ Evaluador, 2 en el Simulator, 3 y 4 en el Planner y 5 después de la demo. No
 los hagas en grupo si vas justo de tiempo; las soluciones están en la rama
 `solutions` (`git diff main origin/solutions`).
 
+**Iteración (cierre, 5–10 min).** Después de la demo, el plan casi nunca
+aprueba. Muéstralo en dos pasos con el mismo pedido:
+
+1. Planner normal: una sola evaluación (banner `Iteration: OFF`).
+2. Reinicia con `PLANNER_REVISIONS=1` (banner `Iteration: ON`) y repite el
+   pedido: al final sale una tabla con la nota de cada ronda.
+
+Mensaje: el Evaluator no solo pone nota, su retroalimentación es el contexto del
+siguiente intento (patrón generador–crítico). El costo es real: cada ronda es
+otra evaluación completa, por eso viene apagado. Detalles y la forma manual en
+el README, sección "Iterar un plan que no aprobó".
+
 ## Si algo falla en vivo
 
 | Síntoma | Qué hacer |
@@ -91,9 +103,10 @@ los hagas en grupo si vas justo de tiempo; las soluciones están en la rama
 | `404` de modelo | `GOOGLE_CLOUD_LOCATION=global`, o cambia `*_MODEL` a `gemini-2.5-flash` |
 | `eval_method: heuristic_fallback` | Los jueces fallaron; `eval_error` dice por qué |
 | `billingEnabled: false` | Vincular la cuenta de facturación: `gcloud billing accounts list` y `gcloud billing projects link <PROJECT_ID> --billing-account=<ACCOUNT_ID>` |
+| Con la iteración encendida, `send_request.py` corta por tiempo | `--timeout 900`, o vuelve a `PLANNER_REVISIONS=0` |
 | `uv sync` muy lento (wifi del lugar) | Que trabajen en parejas sobre una máquina que ya instaló |
 
-## Tres momentos para no saltarse
+## Cuatro momentos para no saltarse
 
 1. **El juez como contrato.** "LLM como juez" no es solo una rúbrica: también
    es el formato que el juez devuelve y lo que el servicio sabe leer. El codelab
@@ -103,6 +116,9 @@ los hagas en grupo si vas justo de tiempo; las soluciones están en la rama
 3. **Una variable de entorno cambia la topología.** El mismo código pasa de dos
    a tres agentes con `SIMULATOR_AGENT_RESOURCE_NAME`, y con un nombre de
    recurso de Agent Engine apuntaría a la nube.
+4. **La crítica como contexto.** Con `PLANNER_REVISIONS=1` el Planner usa los
+   hallazgos del Evaluator para corregir su propio plan. Compara la nota de cada
+   ronda y pregunta: ¿mejoró el plan o solo aprendió a contentar al juez?
 
 ## Las etiquetas `step-XX`
 
