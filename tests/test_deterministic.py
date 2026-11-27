@@ -176,3 +176,15 @@ def test_route_lists_station_km_marks_and_accepts_a_water_interval():
     assert len(normal["water_station_km"]) == normal["water_stations"]
     assert len(hot["water_station_km"]) > len(normal["water_station_km"])
     assert normal["medical_tent_km"][-1] == pytest.approx(42.195)
+
+
+async def test_simulator_decides_approval_in_code():
+    from src.simulator_agent.agent.tools import check_plan_readiness
+
+    no_timeline = await check_plan_readiness(SPANISH_PLAN.replace("cronograma del día de la carrera", "notas"))
+    assert no_timeline["approved"] is True
+    assert no_timeline["recommendations"] == ["timeline_included"]
+
+    no_timing = await check_plan_readiness(SPANISH_PLAN.replace("cronometraje con chip", "salidas por olas"))
+    assert no_timing["approved"] is False
+    assert no_timing["blockers"] == ["timing_system"]

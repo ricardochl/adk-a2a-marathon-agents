@@ -34,6 +34,7 @@ async def test_ex2_checklist_requires_heat_protocol():
     result = await check_plan_readiness(without_heat)
     assert "heat_protocol" in result["checklist"], "Add a 'heat_protocol' key to the checklist"
     assert "heat_protocol" in result["missing_elements"]
+    assert "heat_protocol" in result["blockers"], "Add 'heat_protocol' to BLOCKING_CHECKS"
     assert result["total_checks"] == 9
 
 

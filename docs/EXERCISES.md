@@ -70,7 +70,8 @@ Python, y agregar una regla es agregar una línea.
 **Qué hacer:** en el diccionario `checklist` de `check_plan_readiness`, agrega
 un noveno punto, `"heat_protocol"`, que sea verdadero si el plan menciona
 alguna de estas palabras: `"heat protocol"`, `"heat index"`, `"cooling"` o
-`"calor"`.
+`"calor"`. Después agrégalo al conjunto `BLOCKING_CHECKS` (arriba del
+archivo) para que, si falta, bloquee el plan.
 
 > **Pista:** copia la forma de la línea `"medical_tents"`, que ya revisa una
 > lista de palabras con `any(...)`.
