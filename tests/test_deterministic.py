@@ -166,3 +166,13 @@ def test_distance_check_understands_kilometros():
     exact = _check_distance_compliance_logic("Ruta de 42.195 km")["score"]
     assert _check_distance_compliance_logic("Ruta de 42.195 kilómetros")["score"] == exact
     assert _check_distance_compliance_logic("Ruta de 45 kilómetros")["score"] < exact
+
+
+def test_route_lists_station_km_marks_and_accepts_a_water_interval():
+    tools = _load_route_tools()
+    normal = tools.plan_marathon_route("San Pedro Sula")
+    hot = tools.plan_marathon_route("San Pedro Sula", water_interval_km=2.5)
+    assert normal["water_station_km"][:2] == [5.0, 10.0]
+    assert len(normal["water_station_km"]) == normal["water_stations"]
+    assert len(hot["water_station_km"]) > len(normal["water_station_km"])
+    assert normal["medical_tent_km"][-1] == pytest.approx(42.195)
